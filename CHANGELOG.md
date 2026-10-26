@@ -2,6 +2,19 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/) 和 [语义化版本](https://semver.org/)。
 
+## [Unreleased]
+
+### 修复
+
+- **禁 FileIO 沙箱终端上桥预加载失败（`bridge preload failed: Foribdden FileIO`）**：
+  移植自上游已关闭的 PR #422（原生导入委派）。`BIGQMT_REDIS_DRYRUN.py` 的本地模块
+  加载不再手动 `open()`＋`exec()` 每个源码文件（该调用被禁策略文件读的券商沙箱拒绝），
+  改为全部走 Python/QMT 原生 `import`（解释器 C 层读文件，不经策略层 FileIO 禁令）。
+  启动时也不再替换 `importlib.reload`——替换会让 xtquant_compat 的嵌套导入回落到
+  旧加载器的 `open()`。随附 PR #422 的 `NoopPositionSyncSink` 瘦身（不再累积快照）
+  与对应测试。已在国金实盘终端 2.0.8.300 实测：0.3.62 基底同款改动，此前启动即
+  `Foribdden FileIO` 失败，移植后 `init ok` 全绿（上游 #420 同源问题）。
+
 ## [0.3.73] - 2026-10-24
 
 ### 文档与测试
